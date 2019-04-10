@@ -5328,13 +5328,73 @@
 }, function(module, __webpack_exports__, __webpack_require__) {
     "use strict";
     __webpack_require__.r(__webpack_exports__);
-    var react = __webpack_require__(0), react_default = __webpack_require__.n(react), react_dom = __webpack_require__(3), react_dom_default = __webpack_require__.n(react_dom);
+    var react = __webpack_require__(0), react_default = __webpack_require__.n(react), react_dom = __webpack_require__(3), react_dom_default = __webpack_require__.n(react_dom), prop_types = __webpack_require__(1), prop_types_default = __webpack_require__.n(prop_types);
+    const Timeout = 500;
     class barcode_scanner_BarcodeScanner extends react_default.a.Component {
+        componentDidMount() {
+            fetch("https://cannoharito.github.io/booklog-barcode-search/zbar-processor.js", {
+                mode: "cors"
+            }).then(res => res.blob()).then(blob => {
+                this.worker = new Worker(URL.createObjectURL(blob)), this.worker.onerror = (e => {
+                    console.log("ERROR:Worker:" + e.name + e.toString());
+                }), this.worker.onmessage = (event => {
+                    this.scanFlag || (event.data.length > 0 && this.callbackScan(event.data), this.timerId = setTimeout(() => {
+                        this.scan();
+                    }, Timeout));
+                });
+            }), this.canvas = document.createElement("canvas"), this.ctx = this.canvas.getContext("2d"), 
+            this.timerId = null, this.scanFlag = !1, this.startScan(this.videoRef);
+        }
+        componentWillUnmount() {
+            this.scanFlag = !0, clearTimeout(this.timerId), this.canvas.remove(), delete this.canvas, 
+            this.worker.terminate(), delete this.worker;
+        }
+        startScan(videoRef) {
+            if (!navigator.mediaDevices) return void alert("p1:カメラを起動できないためご利用いただけません");
+            navigator.mediaDevices.getUserMedia({
+                audio: !1,
+                video: {
+                    facingMode: "environment"
+                }
+            }).then(stream => {
+                videoRef.srcObject = stream, videoRef.setAttribute("playsinline", !0), videoRef.play(), 
+                this.timerId = setTimeout(() => {
+                    this.scan();
+                }, Timeout);
+            })["catch"](e => {
+                "NotAllowedError" == e.name ? alert("p2:ブラウザからのカメラアクセスを許可してください") : alert("p2:カメラを起動できないためご利用いただけません:" + e);
+            }), console.log("INFO Usermedia width: " + videoRef.videoWidth + ", height: " + videoRef.videoHeight);
+        }
+        scan() {
+            if (!this.scanFlag && this.videoRef.readyState === this.videoRef.HAVE_ENOUGH_DATA) {
+                this.canvas.width = Math.ceil(this.videoRef.videoWidth), this.canvas.height = Math.ceil(this.videoRef.videoHeight), 
+                this.ctx.drawImage(this.videoRef, 0, 0);
+                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height), this.worker.postMessage(imageData, [ imageData.data.buffer ]);
+            }
+        }
+        callbackScan(datas) {
+            for (let d of datas) "EAN-13" === d[0] && /^19[12]/.test(d[2]) || this.props.startSearch(d[2]);
+        }
+        handleCloseScanner() {
+            this.props.changeScannerState(!1), this.videoRef.srcObject.getTracks().forEach(track => track.stop()), 
+            this.videoRef.srcObject = null;
+        }
         render() {
-            return react_default.a.createElement("div", null, "テストです。");
+            return react_default.a.createElement("div", null, react_default.a.createElement("video", {
+                ref: videoRef => this.videoRef = videoRef,
+                style: {
+                    width: "100%"
+                }
+            }), react_default.a.createElement("button", {
+                onClick: () => this.handleCloseScanner()
+            }, "戻る"));
         }
     }
-    var prop_types = __webpack_require__(1), prop_types_default = __webpack_require__.n(prop_types);
+    barcode_scanner_BarcodeScanner.propTypes = {
+        changeScannerState: prop_types_default.a.func,
+        startSearch: prop_types_default.a.func
+    };
     class form_input_FormInput extends react_default.a.Component {
         constructor(props) {
             super(props), this.state = {
@@ -5392,8 +5452,9 @@
     react_dom_default.a.render(react_default.a.createElement(class extends react_default.a.Component {
         constructor(props) {
             super(props), this.state = {
-                querys: testdata
-            }, this.startSearch = this.startSearch.bind(this);
+                querys: testdata,
+                isScannerOpen: !1
+            }, this.startSearch = this.startSearch.bind(this), this.changeScannerState = this.changeScannerState.bind(this);
         }
         componentDidMount() {
             "<?= query ?>".length > 0 && this.startSearch("<?= query ?>");
@@ -5413,13 +5474,23 @@
             }), google.script.run.withSuccessHandler(data => this.setSearchResult(data)).withFailureHandler(error => alert(error)).fetchPrice("BookOffOnline", query), 
             google.script.run.withSuccessHandler(data => this.setSearchResult(data)).withFailureHandler(error => alert(error)).fetchPrice("NetOff", query));
         }
+        changeScannerState(isOpen) {
+            this.setState(state => ({
+                isScannerOpen: isOpen
+            }));
+        }
         render() {
             const items = Array.from(this.state.querys).map(([query, obj]) => react_default.a.createElement(components_item, {
                 key: query,
                 query: query,
                 result: obj
-            }));
-            return react_default.a.createElement("div", null, react_default.a.createElement(barcode_scanner_BarcodeScanner, null), react_default.a.createElement(form_input_FormInput, {
+            })), scanner = this.state.isScannerOpen ? react_default.a.createElement(barcode_scanner_BarcodeScanner, {
+                changeScannerState: this.changeScannerState,
+                startSearch: this.startSearch
+            }) : react_default.a.createElement("button", {
+                onClick: () => this.changeScannerState(!0)
+            }, "バーコードスキャン");
+            return react_default.a.createElement("div", null, scanner, react_default.a.createElement(form_input_FormInput, {
                 startSearch: this.startSearch
             }), react_default.a.createElement("ol", null, items));
         }

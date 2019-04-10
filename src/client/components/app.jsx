@@ -8,8 +8,12 @@ const testdata = new Map().set('TestQuery',
 export default class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { querys: testdata };
+        this.state = {
+            querys: testdata,
+            isScannerOpen: false,
+        };
         this.startSearch = this.startSearch.bind(this);
+        this.changeScannerState = this.changeScannerState.bind(this);
     }
     componentDidMount() {
         const query = '<?= query ?>';
@@ -43,13 +47,26 @@ export default class App extends React.Component {
             .withFailureHandler((error) => alert(error))
             .fetchPrice('NetOff', query);
     }
+    changeScannerState(isOpen) {
+        this.setState((state) => ({
+            isScannerOpen: isOpen,
+        }));
+    }
     render() {
         const items = Array.from(this.state.querys).map(([query, obj]) =>
             <Item key={query} query={query} result={obj} />
         );
+        const scanner = this.state.isScannerOpen ?
+            (<BarcodeScanner
+                changeScannerState={this.changeScannerState}
+                startSearch={this.startSearch} />)
+            :
+            (<button onClick={() => this.changeScannerState(true)}>
+                バーコードスキャン
+            </button>);
         return (
             <div>
-                <BarcodeScanner />
+                {scanner}
                 <FormInput startSearch={this.startSearch} />
                 <ol>
                     {items}
