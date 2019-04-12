@@ -5,7 +5,9 @@ const GasPlugin = require('gas-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
+// const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
+const DynamicCdnWebpackPlugin = require('dynamic-cdn-webpack-plugin');//add
+const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');//add
 
 const destination = 'dist';
 
@@ -15,20 +17,20 @@ const htmlPlugin = new HtmlWebpackPlugin({
   inlineSource: '.(js|css)$' // embed all javascript and css inline
 });
 
-const htmlWebpackInlineSourcePlugin = new HtmlWebpackInlineSourcePlugin();
+// const htmlWebpackInlineSourcePlugin = new HtmlWebpackInlineSourcePlugin();
 
 const sharedConfigSettings = {
   optimization: {
     minimizer: [
       new UglifyJSPlugin({
         uglifyOptions: {
-          ie8: true,
+          ie8: false,//true,
           mangle: false,
           compress: {
             properties: false
           },
           output: {
-            beautify: true
+            beautify: false//true
           }
         }
       })
@@ -89,7 +91,11 @@ const clientConfig = Object.assign({}, sharedConfigSettings, {
   },
   plugins: [
     htmlPlugin,
-    new HtmlWebpackInlineSourcePlugin()
+    new DynamicCdnWebpackPlugin(),//add
+    // new HtmlWebpackInlineSourcePlugin(),
+    new ScriptExtHtmlWebpackPlugin({
+      inline: ['main.js']
+    }),
   ]
 });
 
@@ -137,3 +143,7 @@ module.exports = [
   clientConfig,
   serverConfig,
 ];
+
+// yarn add -D dynamic-cdn-webpack-plugin module-to-cdn
+// yarn add -D script-ext-html-webpack-plugin
+// yarn remove html-webpack-inline-source-plugin
