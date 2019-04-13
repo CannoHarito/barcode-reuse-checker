@@ -4,7 +4,8 @@ const doGet = (e) => {
   const html = HtmlService.createTemplateFromFile('index');
   html.query = query;
   return html.evaluate()
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setTitle('Barcode Reuse Checker');
 };
 
 const fetchPrice = (service, query) => {
