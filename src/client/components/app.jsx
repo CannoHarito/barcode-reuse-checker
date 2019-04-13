@@ -2,14 +2,17 @@ import React from 'react';
 import BarcodeScanner from './barcode-scanner';
 import FormInput from './form-input';
 import Item from './item';
+import { Container } from 'muicss/react';
 import '../styles.css';
-const testdata = new Map().set('TestQuery',
-    { TestService: [{ price: '100', title: 'TestTitle' }] });
+// const testdata = new Map().set('TestQuery',
+//     { TestService: [{ price: '100', title: 'TestTitle' }] });
+
+const SERVICES = ['BookOffOnline', 'NetOff'];
 export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            querys: testdata,
+            querys: new Map(),
             isScannerOpen: false,
         };
         this.startSearch = this.startSearch.bind(this);
@@ -30,6 +33,17 @@ export default class App extends React.Component {
             ),
         }));
     }
+    fetchPrice(services, query) {
+        if (services.length <= 0) return;
+        const service = services.shift();
+        google.script.run
+            .withSuccessHandler((data) => {
+                this.setSearchResult(data);
+                this.fetchPrice(services, query);
+            })
+            .withFailureHandler((error) => alert(error))
+            .fetchPrice(service, query);
+    }
     startSearch(query) {
         if (!query) return;
         const querys = new Map(this.state.querys);
@@ -38,14 +52,7 @@ export default class App extends React.Component {
             return;
         }
         this.setState({ querys: querys.set(query, {}) });
-        google.script.run
-            .withSuccessHandler((data) => this.setSearchResult(data))
-            .withFailureHandler((error) => alert(error))
-            .fetchPrice('BookOffOnline', query);
-        google.script.run
-            .withSuccessHandler((data) => this.setSearchResult(data))
-            .withFailureHandler((error) => alert(error))
-            .fetchPrice('NetOff', query);
+        this.fetchPrice(SERVICES.concat(), query);
     }
     changeScannerState(isOpen) {
         this.setState((state) => ({
@@ -53,25 +60,23 @@ export default class App extends React.Component {
         }));
     }
     render() {
-        const items = Array.from(this.state.querys).map(([query, obj]) =>
-            <Item key={query} query={query} result={obj} />
-        );
+        const items = Array.from(this.state.querys).reverse()
+            .map(([query, obj]) =>
+                <Item key={query} query={query} result={obj} />
+            );
         const scanner = this.state.isScannerOpen ?
             (<BarcodeScanner
                 changeScannerState={this.changeScannerState}
                 startSearch={this.startSearch} />)
             :
-            (<button onClick={() => this.changeScannerState(true)}>
-                バーコードスキャン
-            </button>);
+            (<FormInput
+                startSearch={this.startSearch}
+                changeScannerState={this.changeScannerState} />);
         return (
-            <React.Fragment>
+            <Container fluid={true} >
                 {scanner}
-                <FormInput startSearch={this.startSearch} />
-                <ol>
-                    {items}
-                </ol>
-            </React.Fragment>
+                {items}
+            </Container>
         );
     }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Form, Button, Input } from 'muicss/react';
 
 export default class FormInput extends React.Component {
   constructor(props) {
@@ -23,15 +24,20 @@ export default class FormInput extends React.Component {
 
   render() {
     return (
-      <form onSubmit={(e) => this.handleSubmit(e)}>
-        <input type="search"
+      <Form onSubmit={(e) => this.handleSubmit(e)} >
+        <Input type="search" placeholder="ISBN,JAN,タイトル..."
           onChange={this.handleChange} value={this.state.query} />
-        <input type="submit" value="検索" />
-      </form>
+        <Button type="submit" variant="raised" >検索</Button>
+        <Button color="primary" variant="raised"
+          onClick={() => this.props.changeScannerState(true)} >
+          バーコードスキャン
+        </Button>
+      </Form>
     );
   }
 }
 
 FormInput.propTypes = {
   startSearch: PropTypes.func,
+  changeScannerState: PropTypes.func,
 };

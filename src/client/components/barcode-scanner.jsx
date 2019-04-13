@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Button } from 'muicss/react';
 // import Item from './item';
 const Timeout = 500;
 export default class BarcodeScanner extends React.Component {
@@ -93,7 +94,9 @@ export default class BarcodeScanner extends React.Component {
         <video
           ref={(videoRef) => this.videoRef = videoRef}
         ></video>
-        <button onClick={() => this.handleCloseScanner()}>戻る</button>
+        <Button variant="raised"
+          onClick={() => this.handleCloseScanner()}
+          style={{ margin: '6px' }} > 戻る</Button>
       </div>
     );
   }
