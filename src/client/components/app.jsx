@@ -46,12 +46,21 @@ export default class App extends React.Component {
     }
     startSearch(query) {
         if (!query) return;
-        const querys = new Map(this.state.querys);
-        if (querys.get(query)) {
-            alert('Already exists: ' + query);
-            return;
+        if (this.state.querys.get(query)) {
+            return this.setState((state) => {
+                const querys = new Map(state.querys);
+                const obj = querys.get(query);
+                querys.delete(query);
+                return {
+                    querys:
+                        querys.set(query, obj),
+                };
+            });
         }
-        this.setState({ querys: querys.set(query, {}) });
+        this.setState((state) => ({
+            querys:
+                new Map(state.querys).set(query, {}),
+        }));
         this.fetchPrice(SERVICES.concat(), query);
     }
     changeScannerState(isOpen) {
