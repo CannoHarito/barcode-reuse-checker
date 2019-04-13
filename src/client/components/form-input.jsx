@@ -23,13 +23,11 @@ export default class FormInput extends React.Component {
 
   render() {
     return (
-      <div className="formBlock">
-        <form onSubmit={(e) => this.handleSubmit(e)}>
-          <input type="search"
-            onChange={this.handleChange} value={this.state.query} />
-          <input type="submit" value="検索" />
-        </form>
-      </div>
+      <form onSubmit={(e) => this.handleSubmit(e)}>
+        <input type="search"
+          onChange={this.handleChange} value={this.state.query} />
+        <input type="submit" value="検索" />
+      </form>
     );
   }
 }

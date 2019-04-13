@@ -65,7 +65,7 @@ export default class BarcodeScanner extends React.Component {
     if (!this.scanFlag) {
       if (this.videoRef.readyState === this.videoRef.HAVE_ENOUGH_DATA) {
         this.canvas.width = Math.ceil(this.videoRef.videoWidth);
-        this.canvas.height = Math.ceil(this.videoRef.videoHeight);
+        this.canvas.height = Math.ceil(this.videoRef.videoWidth / 2);
         this.ctx.drawImage(this.videoRef, 0, 0);
         const imageData = this.ctx.getImageData(0, 0,
           this.canvas.width, this.canvas.height);
@@ -89,12 +89,9 @@ export default class BarcodeScanner extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className={'barcodeScanner'}>
         <video
           ref={(videoRef) => this.videoRef = videoRef}
-          style={{
-            width: '100%',
-          }}
         ></video>
         <button onClick={() => this.handleCloseScanner()}>戻る</button>
       </div>

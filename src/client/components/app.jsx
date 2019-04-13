@@ -65,13 +65,13 @@ export default class App extends React.Component {
                 バーコードスキャン
             </button>);
         return (
-            <div>
+            <React.Fragment>
                 {scanner}
                 <FormInput startSearch={this.startSearch} />
                 <ol>
                     {items}
                 </ol>
-            </div>
+            </React.Fragment>
         );
     }
 }
