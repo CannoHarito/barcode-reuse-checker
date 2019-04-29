@@ -7,7 +7,7 @@ import '../styles.css';
 // const testdata = new Map().set('TestQuery',
 //     { TestService: [{ price: '100', title: 'TestTitle' }] });
 
-const SERVICES = ['BookOffOnline', 'NetOff'];
+const SERVICES = ['BookOffOnline', 'NetOff', 'Surugaya'];
 export default class App extends React.Component {
     constructor(props) {
         super(props);

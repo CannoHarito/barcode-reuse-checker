@@ -65,13 +65,19 @@ const services = {
   ),
   NetOff: new Service(
     'NetOff',
-    (q) => 'https://www.netoff.co.jp/sellcont/nid/PurchaseList/cid/?P2=&P9=4&P10=2&actionNameTxt=&cboCtgry=&cboLRack=&SearchKeyWord1=' + q + '&hdnSearchKeyWord1=' + q + '&hdnSearchKeyWord2=',
+    (q) => 'https://www.netoff.co.jp/sellcont/nid/PurchaseList/cid/?P2=&P9=4&P10=2&actionNameTxt=&cboCtgry=&cboLRack=&SearchKeyWord1=' + encodeURIComponent(q) + '&hdnSearchKeyWord1=' + encodeURIComponent(q) + '&hdnSearchKeyWord2=',
     'utf-8',
     // eslint-disable-next-line max-len, no-control-regex, no-tabs
     new RegExp(/border="">(.+?)<\/span><\/A>	<!-- タイトル -->[\s\S]+?texttype01" style="text-align:center;">([\d,]+)円<\/td>				<!-- 買取価格 -->/g),
-    (m) => {
-      return { price: m[2], title: m[1] };
-    }
+    (m) => ({ price: m[2], title: m[1] })
+  ),
+  Surugaya: new Service(
+    '駿河屋',
+    (q) => 'https://www.suruga-ya.jp/search_buy?category=&search_word=' + encodeURIComponent(q) + '&searchbox=1',
+    'utf-8',
+    // eslint-disable-next-line max-len, no-control-regex, no-tabs
+    new RegExp(/class="title"><a[^>]+>(.+?)<\/a>[\s\S]+?<td>([\d,]+)円<\/td>/g),
+    (m) => ({ price: m[2], title: m[1] })
   ),
 };
 
